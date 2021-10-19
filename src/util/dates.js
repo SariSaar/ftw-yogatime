@@ -211,6 +211,10 @@ const findBookingUnitBoundaries = params => {
   return cumulatedResults;
 };
 
+function round(date, duration, method) {
+  return moment(Math[method]((+date) / (+duration)) * (+duration)).toDate(); 
+}
+
 /**
  * Find the next sharp hour after the current moment.
  *
@@ -219,13 +223,17 @@ const findBookingUnitBoundaries = params => {
  *
  * @returns {Array} an array of localized hours.
  */
-export const findNextBoundary = (timeZone, currentMomentOrDate) =>
-  moment(currentMomentOrDate)
+export const findNextBoundary = (timeZone, currentMomentOrDate) =>{
+  const boundary = moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
-    .add(1, 'hour')
-    .startOf('hour')
+    .add(15, 'minute')
+    // .startOf('hour')
     .toDate();
+
+    const roundedBoundary = round(boundary, moment.duration(15, "minutes"), "ceil");    
+    return roundedBoundary;
+}
 
 /**
  * Find sharp hours inside given time window. Returned strings are localized to given time zone.
@@ -257,7 +265,7 @@ export const findNextBoundary = (timeZone, currentMomentOrDate) =>
  *
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
-export const getSharpHours = (intl, timeZone, startTime, endTime) => {
+export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime) => {
   if (!moment.tz.zone(timeZone)) {
     throw new Error(
       'Time zones are not loaded into moment-timezone. "getSharpHours" function uses time zones.'
@@ -306,8 +314,9 @@ export const getSharpHours = (intl, timeZone, startTime, endTime) => {
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
 export const getStartHours = (intl, timeZone, startTime, endTime) => {
-  const hours = getSharpHours(intl, timeZone, startTime, endTime);
-  return hours.length < 2 ? hours : hours.slice(0, -1);
+  const hours = getTimeslotBoundaries(intl, timeZone, startTime, endTime);
+  console.log({ startTime }, { endTime }, { hours })
+  return hours;
 };
 
 /**
@@ -338,8 +347,9 @@ export const getStartHours = (intl, timeZone, startTime, endTime) => {
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
 export const getEndHours = (intl, timeZone, startTime, endTime) => {
-  const hours = getSharpHours(intl, timeZone, startTime, endTime);
-  return hours.length < 2 ? [] : hours.slice(1);
+  const hours = getTimeslotBoundaries(intl, timeZone, startTime, endTime);
+  console.log('getEndHours', { hours})
+  return hours;
 };
 
 /**
