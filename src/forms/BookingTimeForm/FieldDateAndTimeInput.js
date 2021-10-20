@@ -165,8 +165,6 @@ const getAllTimeValues = (
 
   const endTimes = getAvailableEndTimes(intl, timeZone, startTime, endDate, selectedTimeSlot);
 
-  // console.log({ endTimes })
-
   // We need to convert the timestamp we use as a default value
   // for endTime to string for consistency. This is expected later when we
   // want to compare the sartTime and endTime.

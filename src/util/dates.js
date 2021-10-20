@@ -211,6 +211,13 @@ const findBookingUnitBoundaries = params => {
   return cumulatedResults;
 };
 
+/**
+ * Rounding function for 15 minute intervals
+ * @param {*} date 
+ * @param {*} duration 
+ * @param {*} method 
+ * @returns 
+ */
 function round(date, duration, method) {
   return moment(Math[method]((+date) / (+duration)) * (+duration)).toDate(); 
 }
@@ -223,16 +230,15 @@ function round(date, duration, method) {
  *
  * @returns {Array} an array of localized hours.
  */
-export const findNextBoundary = (timeZone, currentMomentOrDate) =>{
+export const findNextBoundary = (timeZone, currentMomentOrDate, isStart) =>{
   const boundary = moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
     .add(15, 'minute')
-    // .startOf('hour')
     .toDate();
+    const roundDirection = isStart ? "floor" : "ceil";
 
-    const roundedBoundary = round(boundary, moment.duration(15, "minutes"), "ceil");    
-    return roundedBoundary;
+    return round(boundary, moment.duration(15, "minutes"), roundDirection);    
 }
 
 /**
@@ -265,7 +271,7 @@ export const findNextBoundary = (timeZone, currentMomentOrDate) =>{
  *
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
-export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime) => {
+export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime, isStart = false) => {
   if (!moment.tz.zone(timeZone)) {
     throw new Error(
       'Time zones are not loaded into moment-timezone. "getSharpHours" function uses time zones.'
@@ -276,7 +282,7 @@ export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime) => {
   // I.e. startTime might be a sharp hour.
   const millisecondBeforeStartTime = new Date(startTime.getTime() - 1);
   return findBookingUnitBoundaries({
-    currentBoundary: findNextBoundary(timeZone, millisecondBeforeStartTime),
+    currentBoundary: findNextBoundary(timeZone, millisecondBeforeStartTime, isStart),
     startMoment: moment(startTime),
     endMoment: moment(endTime),
     nextBoundaryFn: findNextBoundary,
@@ -314,8 +320,7 @@ export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime) => {
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
 export const getStartHours = (intl, timeZone, startTime, endTime) => {
-  const hours = getTimeslotBoundaries(intl, timeZone, startTime, endTime);
-  console.log({ startTime }, { endTime }, { hours })
+  const hours = getTimeslotBoundaries(intl, timeZone, startTime, endTime, true);
   return hours;
 };
 
@@ -348,7 +353,6 @@ export const getStartHours = (intl, timeZone, startTime, endTime) => {
  */
 export const getEndHours = (intl, timeZone, startTime, endTime) => {
   const hours = getTimeslotBoundaries(intl, timeZone, startTime, endTime);
-  console.log('getEndHours', { hours})
   return hours;
 };
 
