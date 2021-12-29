@@ -13,6 +13,7 @@ import {
   PrimaryButton,
   FieldSelect,
   FieldTimeZoneSelect,
+  FieldTextInput,
 } from '../../components';
 
 import css from './EditListingAvailabilityPlanForm.module.css';
@@ -181,6 +182,15 @@ const DailyPlan = props => {
                             </option>
                           ))}
                         </FieldSelect>
+                      </div>
+                      <div className={css.field}>
+                      <FieldTextInput
+                        type="numeric"
+                        name={`${name}.seats`}
+                        id={`${name}.seats`}
+                        label="Seats"
+                        placeholder="1"
+                      />
                       </div>
                     </div>
                     <div

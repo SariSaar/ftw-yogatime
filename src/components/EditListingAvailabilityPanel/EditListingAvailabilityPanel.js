@@ -72,7 +72,7 @@ const Weekday = props => {
 // Create initial entry mapping for form's initial values
 const createEntryDayGroups = (entries = {}) =>
   entries.reduce((groupedEntries, entry) => {
-    const { startTime, endTime: endHour, dayOfWeek } = entry;
+    const { startTime, endTime: endHour, dayOfWeek, seats } = entry;
     const dayGroup = groupedEntries[dayOfWeek] || [];
     return {
       ...groupedEntries,
@@ -81,6 +81,7 @@ const createEntryDayGroups = (entries = {}) =>
         {
           startTime,
           endTime: endHour === '00:00' ? '24:00' : endHour,
+          seats
         },
       ],
     };
@@ -101,12 +102,12 @@ const createEntriesFromSubmitValues = values =>
   WEEKDAYS.reduce((allEntries, dayOfWeek) => {
     const dayValues = values[dayOfWeek] || [];
     const dayEntries = dayValues.map(dayValue => {
-      const { startTime, endTime } = dayValue;
-      // Note: This template doesn't support seats yet.
+      const { startTime, endTime, seats } = dayValue;
+      // Note: Seats WIP
       return startTime && endTime
         ? {
             dayOfWeek,
-            seats: 1,
+            seats,
             startTime,
             endTime: endTime === '24:00' ? '00:00' : endTime,
           }
@@ -176,6 +177,7 @@ const EditListingAvailabilityPanel = props => {
       // { dayOfWeek: 'sun', startTime: '09:00', endTime: '17:00', seats: 1 },
     ],
   };
+
   const availabilityPlan = currentListing.attributes.availabilityPlan || defaultAvailabilityPlan;
   const initialValues = valuesFromLastSubmit
     ? valuesFromLastSubmit
@@ -199,14 +201,12 @@ const EditListingAvailabilityPanel = props => {
 
   // Save exception click handler
   const saveException = values => {
-    const { availability, exceptionStartTime, exceptionEndTime } = values;
-
-    // TODO: add proper seat handling
-    const seats = availability === 'available' ? 1 : 0;
+    const { availability, exceptionStartTime, exceptionEndTime, seats } = values;
+    const availableSeats = availability === 'available' ? seats : 0;
 
     return onAddAvailabilityException({
       listingId: listing.id,
-      seats,
+      seats: availableSeats,
       start: timestampToDate(exceptionStartTime),
       end: timestampToDate(exceptionEndTime),
     })
@@ -302,6 +302,10 @@ const EditListingAvailabilityPanel = props => {
                           <FormattedMessage id="EditListingAvailabilityPanel.exceptionNotAvailable" />
                         )}
                       </div>
+                      <div className={css.exceptionAvailabilityStatus}>
+                        { seats > 0 ?
+                        <span>(Seats: {seats})</span> : null
+                      }</div>
                     </div>
                     <button
                       className={css.removeExceptionButton}

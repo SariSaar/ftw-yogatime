@@ -34,6 +34,7 @@ import {
   Form,
   IconArrowHead,
   PrimaryButton,
+  FieldTextInput,
 } from '../../components';
 
 import css from './EditListingAvailabilityExceptionForm.module.css';
@@ -641,6 +642,17 @@ const EditListingAvailabilityExceptionForm = props => {
                   </FieldSelect>
                 </div>
               </div>
+                <div className={css.field}>
+                  { availability === 'available' ?
+                    <FieldTextInput
+                      type="numeric"
+                      name="seats"
+                      id={`${idPrefix}.seats`}
+                      label="Seats"
+                      placeholder="0"
+                    /> : null
+                  }
+                      </div>
             </div>
 
             <div className={css.submitButton}>
