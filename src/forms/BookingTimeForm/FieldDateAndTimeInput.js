@@ -447,6 +447,11 @@ class FieldDateAndTimeInput extends Component {
       findNextBoundary(timeZone, TODAY)
     );
 
+    const seatsArray = [];
+    for (let seat = 1; seat <= selectedTimeSlot?.attributes?.seats; seat++) {
+      seatsArray.push(seat);
+    }
+
     const startTimeLabel = intl.formatMessage({ id: 'FieldDateTimeInput.startTime' });
     const endTimeLabel = intl.formatMessage({ id: 'FieldDateTimeInput.endTime' });
     /**
@@ -567,6 +572,22 @@ class FieldDateAndTimeInput extends Component {
             </FieldSelect>
           </div>
         </div>
+          <div className={css.formRow}>
+          <div className={css.field}>
+            {selectedTimeSlot ? 
+              ( <FieldSelect
+              name="seats"
+              id={formId ? `${formId}.seats` : 'seats'}
+              label="Seats"
+            >
+              {seatsArray.map(seat => (
+                <option key={seat} value={seat}>{seat}</option>
+              ))}
+            </FieldSelect>) : null
+            }
+          </div>
+          </div>
+        
       </div>
     );
   }

@@ -22,14 +22,21 @@ const LineItemBasePriceMaybe = props => {
     item => item.code === unitType && !item.reversal
   );
 
-  const quantity = unitPurchase ? unitPurchase.quantity.toString() : null;
+  const quantity = unitPurchase?.quantity 
+    ? unitPurchase.quantity.toString() 
+      : unitPurchase?.units 
+      ? unitPurchase.units.toString() : null;
   const unitPrice = unitPurchase ? formatMoney(intl, unitPurchase.unitPrice) : null;
   const total = unitPurchase ? formatMoney(intl, unitPurchase.lineTotal) : null;
+
+  const message = unitPurchase?.seats > 1 
+    ? ( <FormattedMessage id='BookingBreakdown.baseUnitSeats' values={{ unitPrice, quantity, seats: unitPurchase.seats }} />)
+    :  <FormattedMessage id={translationKey} values={{ unitPrice, quantity }} />
 
   return quantity && total ? (
     <div className={css.lineItem}>
       <span className={css.itemLabel}>
-        <FormattedMessage id={translationKey} values={{ unitPrice, quantity }} />
+        {message}
       </span>
       <span className={css.itemValue}>{total}</span>
     </div>
