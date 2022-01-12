@@ -331,6 +331,7 @@ const fetchMonthlyTimeSlots = (dispatch, listing) => {
 
 export const fetchTransactionLineItems = ({ bookingData, listingId, isOwnListing }) => dispatch => {
   dispatch(fetchLineItemsRequest());
+  console.log({ bookingData })
   transactionLineItems({ bookingData, listingId, isOwnListing })
     .then(response => {
       const lineItems = response.data;

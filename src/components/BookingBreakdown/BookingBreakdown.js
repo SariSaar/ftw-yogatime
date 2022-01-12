@@ -90,12 +90,12 @@ export const BookingBreakdownComponent = props => {
 
   return (
     <div className={classes}>
-      <LineItemBookingPeriod
+      {booking ? <LineItemBookingPeriod
         booking={booking}
         unitType={unitType}
         dateType={dateType}
         timeZone={timeZone}
-      />
+      /> : null }
       <LineItemUnitPriceMaybe transaction={transaction} unitType={unitType} intl={intl} />
 
       <LineItemBasePriceMaybe transaction={transaction} unitType={unitType} intl={intl} />
@@ -156,7 +156,7 @@ BookingBreakdownComponent.propTypes = {
   userRole: oneOf(['customer', 'provider']).isRequired,
   unitType: propTypes.bookingUnitType.isRequired,
   transaction: propTypes.transaction.isRequired,
-  booking: propTypes.booking.isRequired,
+  // booking: propTypes.booking.isRequired,
   dateType: propTypes.dateType,
   timeZone: string,
 

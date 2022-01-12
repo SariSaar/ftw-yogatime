@@ -60,7 +60,7 @@ const estimatedTotalPrice = lineItems => {
 //
 // We need to use FTW backend to calculate the correct line items through thransactionLineItems
 // endpoint so that they can be passed to this estimated transaction.
-const estimatedTransaction = (bookingStart, bookingEnd, lineItems, userRole) => {
+const estimatedTransaction = (bookingStart, bookingEnd, selectedHours, lineItems, userRole) => {
   const now = new Date();
 
   const isCustomer = userRole === 'customer';
@@ -89,7 +89,7 @@ const estimatedTransaction = (bookingStart, bookingEnd, lineItems, userRole) => 
         },
       ],
     },
-    booking: {
+    booking: selectedHours ? null : {
       id: new UUID('estimated-booking'),
       type: 'booking',
       attributes: {
@@ -101,18 +101,21 @@ const estimatedTransaction = (bookingStart, bookingEnd, lineItems, userRole) => 
 };
 
 const EstimatedBreakdownMaybe = props => {
-  const { unitType, startDate, endDate, timeZone } = props.bookingData;
+  const { unitType, startDate, endDate, selectedHours, timeZone } = props.bookingData;
   const lineItems = props.lineItems;
+
+  console.log({ selectedHours }, {lineItems})
 
   // Currently the estimated breakdown is used only on ListingPage where we want to
   // show the breakdown for customer so we can use hard-coded value here
   const userRole = 'customer';
 
   const tx =
-    startDate && endDate && lineItems
-      ? estimatedTransaction(startDate, endDate, lineItems, userRole)
+    ((startDate && endDate) || selectedHours ) && lineItems
+      ? estimatedTransaction(startDate, endDate, selectedHours, lineItems, userRole)
       : null;
 
+    console.log({ tx })
   return tx ? (
     <BookingBreakdown
       className={css.receipt}

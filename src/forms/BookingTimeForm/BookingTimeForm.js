@@ -7,7 +7,7 @@ import { FormattedMessage, intlShape, injectIntl } from '../../util/reactIntl';
 import { timestampToDate } from '../../util/dates';
 import { propTypes } from '../../util/types';
 import config from '../../config';
-import { Form, IconSpinner, PrimaryButton } from '../../components';
+import { FieldTextInput, Form, IconSpinner, PrimaryButton } from '../../components';
 import EstimatedBreakdownMaybe from './EstimatedBreakdownMaybe';
 import FieldDateAndTimeInput from './FieldDateAndTimeInput';
 
@@ -30,9 +30,10 @@ export class BookingTimeFormComponent extends Component {
   // In case you add more fields to the form, make sure you add
   // the values here to the bookingData object.
   handleOnChange(formValues) {
-    const { bookingStartTime, bookingEndTime } = formValues.values;
+    const { bookingStartTime, bookingEndTime, selectedHours } = formValues.values;
     const startDate = bookingStartTime ? timestampToDate(bookingStartTime) : null;
     const endDate = bookingEndTime ? timestampToDate(bookingEndTime) : null;
+    console.log({ selectedHours })
 
     const listingId = this.props.listingId;
     const isOwnListing = this.props.isOwnListing;
@@ -40,6 +41,14 @@ export class BookingTimeFormComponent extends Component {
     // We expect values bookingStartTime and bookingEndTime to be strings
     // which is the default case when the value has been selected through the form
     const isSameTime = bookingStartTime === bookingEndTime;
+
+    if (selectedHours) {
+      this.props.onFetchTransactionLineItems({
+        bookingData: { selectedHours },
+        listingId,
+        isOwnListing
+      })
+    }
 
     if (bookingStartTime && bookingEndTime && !isSameTime && !this.props.fetchLineItemsInProgress) {
       this.props.onFetchTransactionLineItems({
@@ -99,8 +108,11 @@ export class BookingTimeFormComponent extends Component {
             fetchLineItemsError,
           } = fieldRenderProps;
 
+          console.log('values', { ...values }, { lineItems})
+
           const startTime = values && values.bookingStartTime ? values.bookingStartTime : null;
           const endTime = values && values.bookingEndTime ? values.bookingEndTime : null;
+          const selectedHours = values && values.selectedHours ? parseInt(values.selectedHours) : null;
 
           const bookingStartLabel = intl.formatMessage({
             id: 'BookingTimeForm.bookingStartTitle',
@@ -123,7 +135,10 @@ export class BookingTimeFormComponent extends Component {
                   endDate,
                   timeZone,
                 }
-              : null;
+              : {
+                unitType,
+                selectedHours
+              };
 
           const showEstimatedBreakdown =
             bookingData && lineItems && !fetchLineItemsInProgress && !fetchLineItemsError;
@@ -173,7 +188,7 @@ export class BookingTimeFormComponent extends Component {
                   this.handleOnChange(values);
                 }}
               />
-              {monthlyTimeSlots && timeZone ? (
+              {monthlyTimeSlots && timeZone && (1 == 2) ? (
                 <FieldDateAndTimeInput
                   {...dateInputProps}
                   className={css.bookingDates}
@@ -187,7 +202,15 @@ export class BookingTimeFormComponent extends Component {
                   pristine={pristine}
                   timeZone={timeZone}
                 />
-              ) : null}
+              ) :
+                <FieldTextInput
+                  id="selectedHours"
+                  label="Select a number of hours"
+                  name="selectedHours"
+                  type="number"
+
+                />
+              }
 
               {bookingInfoMaybe}
               {loadingSpinnerMaybe}
