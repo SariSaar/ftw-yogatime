@@ -14,20 +14,24 @@ import { ensureTransaction } from './data';
 // At this transition a PaymentIntent is created by Marketplace API.
 // After this transition, the actual payment must be made on client-side directly to Stripe.
 export const TRANSITION_REQUEST_PAYMENT = 'transition/request-payment';
+export const TRANSITION_REQUEST_NONBOOKING_PAYMENT = 'transition/request-nonbooking-payment';
 
 // A customer can also initiate a transaction with an enquiry, and
 // then transition that with a request.
 export const TRANSITION_ENQUIRE = 'transition/enquire';
 export const TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY = 'transition/request-payment-after-enquiry';
+export const TRANSITION_REQUEST_NONBOOKING_PAYMENT_AFTER_ENQUIRY = 'transition/request-nonbooking-payment-after-enquiry';
 
 // Stripe SDK might need to ask 3D security from customer, in a separate front-end step.
 // Therefore we need to make another transition to Marketplace API,
 // to tell that the payment is confirmed.
 export const TRANSITION_CONFIRM_PAYMENT = 'transition/confirm-payment';
+export const TRANSITION_CONFIRM_NONBOOKING_PAYMENT = 'transition/confirm-nonbooking-payment';
 
 // If the payment is not confirmed in the time limit set in transaction process (by default 15min)
 // the transaction will expire automatically.
 export const TRANSITION_EXPIRE_PAYMENT = 'transition/expire-payment';
+export const TRANSITION_EXPIRE_NONBOOKING_PAYMENT = 'transition/expire-nonbooking-payment';
 
 // When the provider accepts or declines a transaction from the
 // SalePage, it is transitioned with the accept or decline transition.
@@ -39,9 +43,11 @@ export const TRANSITION_EXPIRE = 'transition/expire';
 
 // Admin can also cancel the transition.
 export const TRANSITION_CANCEL = 'transition/cancel';
+export const TRANSITION_CANCEL_NONBOOKING = 'transition/cancel-nonbooking';
 
 // The backend will mark the transaction completed.
 export const TRANSITION_COMPLETE = 'transition/complete';
+export const TRANSITION_MARK_RECEIVED = 'transition/mark-received';
 
 // Reviews are given through transaction transitions. Review 1 can be
 // by provider or customer, and review 2 will be the other party of
@@ -85,10 +91,13 @@ export const TX_TRANSITION_ACTORS = [
 const STATE_INITIAL = 'initial';
 const STATE_ENQUIRY = 'enquiry';
 const STATE_PENDING_PAYMENT = 'pending-payment';
+const STATE_PENDING_NONBOOKING_PAYMENT = 'pending-nonbooking-payment';
 const STATE_PAYMENT_EXPIRED = 'payment-expired';
+const STATE_NONBOOKING_PAYMENT_EXPIRED = 'nonbooking-payment-expired';
 const STATE_PREAUTHORIZED = 'preauthorized';
 const STATE_DECLINED = 'declined';
 const STATE_ACCEPTED = 'accepted';
+const STATE_ACCEPTED_NONBOOKING = 'accepted-nonbooking';
 const STATE_CANCELED = 'canceled';
 const STATE_DELIVERED = 'delivered';
 const STATE_REVIEWED = 'reviewed';
@@ -119,11 +128,13 @@ const stateDescription = {
       on: {
         [TRANSITION_ENQUIRE]: STATE_ENQUIRY,
         [TRANSITION_REQUEST_PAYMENT]: STATE_PENDING_PAYMENT,
+        [TRANSITION_REQUEST_NONBOOKING_PAYMENT]: STATE_PENDING_NONBOOKING_PAYMENT,
       },
     },
     [STATE_ENQUIRY]: {
       on: {
         [TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY]: STATE_PENDING_PAYMENT,
+        [TRANSITION_REQUEST_NONBOOKING_PAYMENT_AFTER_ENQUIRY]: STATE_PENDING_NONBOOKING_PAYMENT,
       },
     },
 
@@ -134,7 +145,15 @@ const stateDescription = {
       },
     },
 
+    [STATE_PENDING_NONBOOKING_PAYMENT]: {
+      on: {
+        [TRANSITION_EXPIRE_NONBOOKING_PAYMENT]: STATE_NONBOOKING_PAYMENT_EXPIRED,
+        [TRANSITION_CONFIRM_NONBOOKING_PAYMENT]: STATE_ACCEPTED_NONBOOKING,
+      },
+    },
+
     [STATE_PAYMENT_EXPIRED]: {},
+    [STATE_NONBOOKING_PAYMENT_EXPIRED]: {},
     [STATE_PREAUTHORIZED]: {
       on: {
         [TRANSITION_DECLINE]: STATE_DECLINED,
@@ -148,6 +167,13 @@ const stateDescription = {
       on: {
         [TRANSITION_CANCEL]: STATE_CANCELED,
         [TRANSITION_COMPLETE]: STATE_DELIVERED,
+      },
+    },
+
+    [STATE_ACCEPTED_NONBOOKING]: {
+      on: {
+        [TRANSITION_CANCEL_NONBOOKING]: STATE_CANCELED,
+        [TRANSITION_MARK_RECEIVED]: STATE_DELIVERED,
       },
     },
 
