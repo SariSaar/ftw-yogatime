@@ -8,6 +8,9 @@ import {
   TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY,
   TRANSITION_CONFIRM_PAYMENT,
   isPrivileged,
+  TRANSITION_REQUEST_NONBOOKING_PAYMENT_AFTER_ENQUIRY,
+  TRANSITION_REQUEST_NONBOOKING_PAYMENT,
+  TRANSITION_CONFIRM_NONBOOKING_PAYMENT,
 } from '../../util/transaction';
 import * as log from '../../util/log';
 import { fetchCurrentUserHasOrdersSuccess, fetchCurrentUser } from '../../ducks/user.duck';
@@ -164,18 +167,35 @@ export const stripeCustomerError = e => ({
 export const initiateOrder = (orderParams, transactionId) => (dispatch, getState, sdk) => {
   dispatch(initiateOrderRequest());
 
+  console.log({ orderParams })
   // If we already have a transaction ID, we should transition, not
   // initiate.
   const isTransition = !!transactionId;
-  const transition = isTransition
+
+  let transition;
+  let bookingData;
+
+  if (!(orderParams.bookingStart && orderParams.bookingEnd)) {
+    transition = isTransition
+    ? TRANSITION_REQUEST_NONBOOKING_PAYMENT_AFTER_ENQUIRY
+    : TRANSITION_REQUEST_NONBOOKING_PAYMENT;
+
+    bookingData = {
+      selectedHours: orderParams.quantity,
+    };
+
+    orderParams.bookingEnd = null;
+    orderParams.bookingStart = null;
+  } else {
+    transition = isTransition
     ? TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY
     : TRANSITION_REQUEST_PAYMENT;
-  const isPrivilegedTransition = isPrivileged(transition);
 
-  const bookingData = {
+    bookingData = {
     startDate: orderParams.bookingStart,
     endDate: orderParams.bookingEnd,
   };
+  }
 
   const bodyParams = isTransition
     ? {
@@ -192,6 +212,9 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
     include: ['booking', 'provider'],
     expand: true,
   };
+
+  const isPrivilegedTransition = isPrivileged(transition);
+
 
   const handleSucces = response => {
     const entities = denormalisedResponseEntities(response);
@@ -238,12 +261,14 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
   }
 };
 
-export const confirmPayment = orderParams => (dispatch, getState, sdk) => {
+export const confirmPayment = (orderParams, isNonBooking = false) => (dispatch, getState, sdk) => {
+
+  console.log('inside confirmPayment', { orderParams }, { isNonBooking })
   dispatch(confirmPaymentRequest());
 
   const bodyParams = {
     id: orderParams.transactionId,
-    transition: TRANSITION_CONFIRM_PAYMENT,
+    transition: isNonBooking ? TRANSITION_CONFIRM_NONBOOKING_PAYMENT : TRANSITION_CONFIRM_PAYMENT,
     params: {},
   };
 
@@ -304,15 +329,32 @@ export const speculateTransaction = (orderParams, transactionId) => (dispatch, g
   // If we already have a transaction ID, we should transition, not
   // initiate.
   const isTransition = !!transactionId;
-  const transition = isTransition
+  let transition;
+  let bookingData;
+
+  if (orderParams.selectedHours) {
+    transition = isTransition
+    ? TRANSITION_REQUEST_NONBOOKING_PAYMENT_AFTER_ENQUIRY
+    : TRANSITION_REQUEST_NONBOOKING_PAYMENT;
+
+    bookingData = {
+      selectedHours: orderParams.selectedHours,
+    };
+
+    orderParams.bookingEnd = null;
+    orderParams.bookingStart = null;
+  } else {
+    transition = isTransition
     ? TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY
     : TRANSITION_REQUEST_PAYMENT;
-  const isPrivilegedTransition = isPrivileged(transition);
 
-  const bookingData = {
+    bookingData = {
     startDate: orderParams.bookingStart,
     endDate: orderParams.bookingEnd,
   };
+  }
+  
+  const isPrivilegedTransition = isPrivileged(transition);
 
   const params = {
     ...orderParams,

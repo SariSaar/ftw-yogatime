@@ -175,8 +175,8 @@ export class CheckoutPageComponent extends Component {
       pageData.listing.id &&
       pageData.bookingData &&
       pageData.bookingDates &&
-      pageData.bookingDates.bookingStart &&
-      pageData.bookingDates.bookingEnd &&
+      // pageData.bookingDates.bookingStart &&
+      // pageData.bookingDates.bookingEnd &&
       pageData.bookingData.quantity &&
       !isBookingCreated;
 
@@ -193,6 +193,7 @@ export class CheckoutPageComponent extends Component {
           listingId,
           bookingStart,
           bookingEnd,
+          selectedHours: pageData.bookingData.quantity,
         },
         transactionId
       );
@@ -311,7 +312,8 @@ export class CheckoutPageComponent extends Component {
     // Parameter should contain { paymentIntent, transactionId } returned in step 2
     const fnConfirmPayment = fnParams => {
       createdPaymentIntent = fnParams.paymentIntent;
-      return onConfirmPayment(fnParams);
+      console.log('fnConfirmPayment', { createdPaymentIntent })
+      return onConfirmPayment(fnParams, true);
     };
 
     // Step 4: send initial message
@@ -372,8 +374,8 @@ export class CheckoutPageComponent extends Component {
 
     const orderParams = {
       listingId: pageData.listing.id,
-      bookingStart: tx.booking.attributes.start,
-      bookingEnd: tx.booking.attributes.end,
+      bookingStart: tx.booking?.attributes?.start,
+      bookingEnd: tx.booking?.attributes?.end,
       quantity: pageData.bookingData ? pageData.bookingData.quantity : null,
       ...optionalPaymentParams,
     };
@@ -583,7 +585,7 @@ export class CheckoutPageComponent extends Component {
       ? currentListing.attributes.availabilityPlan.timezone
       : 'Etc/UTC';
     const breakdown =
-      tx.id && txBooking.id ? (
+      tx.id ? (
         <BookingBreakdown
           className={css.bookingBreakdown}
           userRole="customer"
@@ -942,7 +944,7 @@ const mapDispatchToProps = dispatch => ({
   onInitiateOrder: (params, transactionId) => dispatch(initiateOrder(params, transactionId)),
   onRetrievePaymentIntent: params => dispatch(retrievePaymentIntent(params)),
   onConfirmCardPayment: params => dispatch(confirmCardPayment(params)),
-  onConfirmPayment: params => dispatch(confirmPayment(params)),
+  onConfirmPayment: (params, isNonbooking) => dispatch(confirmPayment(params, isNonbooking)),
   onSendMessage: params => dispatch(sendMessage(params)),
   onSavePaymentMethod: (stripeCustomer, stripePaymentMethodId) =>
     dispatch(savePaymentMethod(stripeCustomer, stripePaymentMethodId)),

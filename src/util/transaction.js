@@ -261,7 +261,8 @@ export const txIsRequested = tx =>
   getTransitionsToState(STATE_PREAUTHORIZED).includes(txLastTransition(tx));
 
 export const txIsAccepted = tx =>
-  getTransitionsToState(STATE_ACCEPTED).includes(txLastTransition(tx));
+  [...getTransitionsToState(STATE_ACCEPTED),
+  ...getTransitionsToState(STATE_ACCEPTED_NONBOOKING)].includes(txLastTransition(tx));
 
 export const txIsDeclined = tx =>
   getTransitionsToState(STATE_DECLINED).includes(txLastTransition(tx));
@@ -369,7 +370,10 @@ export const txRoleIsCustomer = userRole => userRole === TX_TRANSITION_ACTOR_CUS
 // should go through the local API endpoints, or if using JS SDK is
 // enough.
 export const isPrivileged = transition => {
-  return [TRANSITION_REQUEST_PAYMENT, TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY].includes(
-    transition
-  );
+  return [
+    TRANSITION_REQUEST_PAYMENT, 
+    TRANSITION_REQUEST_PAYMENT_AFTER_ENQUIRY, 
+    TRANSITION_REQUEST_NONBOOKING_PAYMENT,
+    TRANSITION_REQUEST_NONBOOKING_PAYMENT_AFTER_ENQUIRY,
+  ].includes( transition);
 };

@@ -10,7 +10,7 @@ const bookingData = tx => {
   // from actual start and end times used for availability reservation. It can help in situations
   // where there are preparation time needed between bookings.
   // Read more: https://www.sharetribe.com/api-reference/marketplace.html#bookings
-  const { start, end, displayStart, displayEnd } = tx.booking.attributes;
+  const { start, end, displayStart, displayEnd } = tx.booking?.attributes;
   const bookingStart = displayStart || start;
   const bookingEnd = displayEnd || end;
   return { bookingStart, bookingEnd };
@@ -20,7 +20,7 @@ const BookingTimeInfo = props => {
   const { bookingClassName, tx, dateType, timeZone } = props;
   const isEnquiry = txIsEnquired(tx);
 
-  if (isEnquiry) {
+  if (isEnquiry || !tx.booking) {
     return null;
   }
 

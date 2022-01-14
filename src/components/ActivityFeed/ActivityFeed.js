@@ -27,6 +27,8 @@ import {
   txRoleIsCustomer,
   getUserTxRole,
   isRelevantPastTransition,
+  TRANSITION_CONFIRM_NONBOOKING_PAYMENT,
+  TRANSITION_CANCEL_NONBOOKING,
 } from '../../util/transaction';
 import { propTypes } from '../../util/types';
 import * as log from '../../util/log';
@@ -117,6 +119,7 @@ const resolveTransitionMessage = (
 
   switch (currentTransition) {
     case TRANSITION_CONFIRM_PAYMENT:
+    case TRANSITION_CONFIRM_NONBOOKING_PAYMENT:
       return isOwnTransition ? (
         <FormattedMessage id="ActivityFeed.ownTransitionRequest" values={{ listingTitle }} />
       ) : (
@@ -144,6 +147,7 @@ const resolveTransitionMessage = (
         <FormattedMessage id="ActivityFeed.transitionExpire" values={{ displayName }} />
       );
     case TRANSITION_CANCEL:
+    case TRANSITION_CANCEL_NONBOOKING:
       return <FormattedMessage id="ActivityFeed.transitionCancel" />;
     case TRANSITION_COMPLETE:
       // Show the leave a review link if the state is delivered and if the current user is the first to leave a review

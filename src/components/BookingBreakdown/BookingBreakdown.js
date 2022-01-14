@@ -90,7 +90,7 @@ export const BookingBreakdownComponent = props => {
 
   return (
     <div className={classes}>
-      {booking ? <LineItemBookingPeriod
+      {booking && booking.attributes.id ? <LineItemBookingPeriod
         booking={booking}
         unitType={unitType}
         dateType={dateType}
