@@ -7,7 +7,6 @@ import { EditListingPhotosForm } from '../../forms';
 import { ensureOwnListing } from '../../util/data';
 import { ListingLink } from '../../components';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
-import {arrayMoveImmutable} from 'array-move';
 
 import css from './EditListingPhotosPanel.module.css';
 
@@ -46,8 +45,20 @@ class EditListingPhotosPanel extends Component {
     super(props);
 
     this.state = {
-      reorderedImages: null,
+      reorderedImages: this.props.images,
     }
+  }
+
+  componentDidUpdate() {
+    const lengthChanged = this.props.images.length !== this.state.reorderedImages.length;
+
+    if (lengthChanged) {
+      this.setState({ reorderedImages: this.props.images })
+    }
+  }
+
+  shouldComponentUpdate(props) {
+    return props.images.every(i => !!i.imageId?.uuid || !!i.id?.uuid);
   }
 
   render() {
@@ -74,7 +85,6 @@ class EditListingPhotosPanel extends Component {
     const currentListing = ensureOwnListing(listing);
 
     const onSortEnd = (newImages) => {
-      console.log('inside panel',  {newImages})
       this.setState({ reorderedImages: newImages })
     }    
 
@@ -104,7 +114,7 @@ class EditListingPhotosPanel extends Component {
           ready={ready}
           fetchErrors={errors}
           initialValues={{ images }}
-          images={images}
+          images={this.state.reorderedImages}
           onImageUpload={onImageUpload}
           onSubmit={values => {
             const { addImage, ...updateValues } = values;

@@ -44,18 +44,14 @@ export class EditListingPhotosFormComponent extends Component {
 
 
   handleOnSortEnd = ({ oldIndex, newIndex }) => {
-    console.log('onSortEnd')
     const { images } = this.state;
-    console.log({ oldIndex }, { newIndex }, {images}, { props: this.props });
     const newImages = arrayMoveImmutable(images, oldIndex, newIndex);
     this.setState({ images: newImages })
-    console.log({ reordered: this.state.images })
     this.props.onSortEnd(newImages)
   }    
 
 
   render() {
-    const { onSortEnd } = this.props;
     return (
       <FinalForm
         {...this.props}
@@ -162,7 +158,7 @@ export class EditListingPhotosFormComponent extends Component {
               ) : null}
               <AddImages
                 className={css.imagesField}
-                images={this.state.images}
+                images={this.props.images}
                 thumbnailClassName={css.thumbnail}
                 savedImageAltText={intl.formatMessage({
                   id: 'EditListingPhotosForm.savedImageAltText',
