@@ -14,8 +14,9 @@ import { ImageFromFile, ResponsiveImage, IconSpinner } from '../../components';
 
 import css from './AddImages.module.css';
 import RemoveImageButton from './RemoveImageButton';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 
-const ThumbnailWrapper = props => {
+const ThumbnailWrapper = SortableElement(props => {
   const { className, image, savedImageAltText, onRemoveImage } = props;
   const handleRemoveClick = e => {
     e.stopPropagation();
@@ -62,9 +63,35 @@ const ThumbnailWrapper = props => {
       </div>
     );
   }
-};
+});
 
 ThumbnailWrapper.defaultProps = { className: null };
+
+const ImagesContainer = SortableContainer(props => {
+  const {
+    thumbnailClassName,
+    images,
+    savedImageAltText,
+    onRemoveImage,
+  } = props;
+
+  return (
+    <div>
+    {images.map((image, index) => {
+      return (
+        <ThumbnailWrapper
+        image={image}
+        index={index}
+        key={image.id.uuid || image.id}
+        className={thumbnailClassName}
+        savedImageAltText={savedImageAltText}
+        onRemoveImage={onRemoveImage}
+        />
+        );
+      })}
+    </div>
+  )
+})
 
 const { array, func, node, string, object } = PropTypes;
 
@@ -79,26 +106,11 @@ const AddImages = props => {
   const {
     children,
     className,
-    thumbnailClassName,
-    images,
-    savedImageAltText,
-    onRemoveImage,
   } = props;
   const classes = classNames(css.root, className);
   return (
     <div className={classes}>
-      {images.map((image, index) => {
-        return (
-          <ThumbnailWrapper
-            image={image}
-            index={index}
-            key={image.id.uuid || image.id}
-            className={thumbnailClassName}
-            savedImageAltText={savedImageAltText}
-            onRemoveImage={onRemoveImage}
-          />
-        );
-      })}
+      <ImagesContainer {...props}/>
       {children}
     </div>
   );

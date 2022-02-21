@@ -73,9 +73,8 @@ class EditListingPhotosPanel extends Component {
     const classes = classNames(rootClass, className);
     const currentListing = ensureOwnListing(listing);
 
-    const onSortEnd = ({ oldIndex, newIndex }) => {
-      console.log({ oldIndex }, { newIndex });
-      const newImages = arrayMoveImmutable(images, oldIndex, newIndex);
+    const onSortEnd = (newImages) => {
+      console.log('inside panel',  {newImages})
       this.setState({ reorderedImages: newImages })
     }    
 
@@ -125,6 +124,7 @@ class EditListingPhotosPanel extends Component {
           onChange={onChange}
           onUpdateImageOrder={onUpdateImageOrder}
           onRemoveImage={onRemoveImage}
+          onSortEnd={onSortEnd}
           saveActionMsg={submitButtonText}
           updated={panelUpdated}
           updateInProgress={updateInProgress}
