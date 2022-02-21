@@ -6,10 +6,50 @@ import { LISTING_STATE_DRAFT } from '../../util/types';
 import { EditListingPhotosForm } from '../../forms';
 import { ensureOwnListing } from '../../util/data';
 import { ListingLink } from '../../components';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
+import {arrayMoveImmutable} from 'array-move';
 
 import css from './EditListingPhotosPanel.module.css';
 
+const ImageList = SortableContainer(({images})=> {
+  if (!images) {
+    return null;
+  }
+
+  return (
+    <div>
+      {images.map((img, idx) => (
+        <div>
+          <ImageElement
+            index={idx}
+            key={img.id.uuid}
+            id={img.id.uuid}
+          />
+        </div>
+      ))}
+    </div>
+  )
+})
+
+const ImageElement = SortableElement(props => {
+  const { id } = props;
+
+  return(
+    <div>
+      <span key={id} >Image id: {id} </span>
+    </div>
+  )
+})
+
 class EditListingPhotosPanel extends Component {
+  constructor(props){
+    super(props);
+
+    this.state = {
+      reorderedImages: null,
+    }
+  }
+
   render() {
     const {
       className,
@@ -32,6 +72,12 @@ class EditListingPhotosPanel extends Component {
     const rootClass = rootClassName || css.root;
     const classes = classNames(rootClass, className);
     const currentListing = ensureOwnListing(listing);
+
+    const onSortEnd = ({ oldIndex, newIndex }) => {
+      console.log({ oldIndex }, { newIndex });
+      const newImages = arrayMoveImmutable(images, oldIndex, newIndex);
+      this.setState({ reorderedImages: newImages })
+    }    
 
     const isPublished =
       currentListing.id && currentListing.attributes.state !== LISTING_STATE_DRAFT;
@@ -63,7 +109,18 @@ class EditListingPhotosPanel extends Component {
           onImageUpload={onImageUpload}
           onSubmit={values => {
             const { addImage, ...updateValues } = values;
+
+            if (!!this.state.reorderedImages) {
+              const reorderedValues = {
+                ...updateValues,
+                images: this.state.reorderedImages,
+              } 
+
+              onSubmit(reorderedValues)
+            } else {
             onSubmit(updateValues);
+            }
+
           }}
           onChange={onChange}
           onUpdateImageOrder={onUpdateImageOrder}
@@ -72,6 +129,14 @@ class EditListingPhotosPanel extends Component {
           updated={panelUpdated}
           updateInProgress={updateInProgress}
         />
+
+          <div>
+            <ImageList 
+              onSortEnd={onSortEnd}
+              images={images}
+              axis='y'
+              />
+          </div>
       </div>
     );
   }
