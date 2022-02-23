@@ -9,6 +9,8 @@ import { propTypes } from '../../util/types';
 import { nonEmptyArray, composeValidators } from '../../util/validators';
 import { isUploadImageOverLimitError } from '../../util/errors';
 import { AddImages, Button, Form, ValidationError } from '../../components';
+import {arrayMoveImmutable} from 'array-move';
+
 
 import css from './EditListingPhotosForm.module.css';
 
@@ -17,7 +19,11 @@ const ACCEPT_IMAGES = 'image/*';
 export class EditListingPhotosFormComponent extends Component {
   constructor(props) {
     super(props);
-    this.state = { imageUploadRequested: false };
+    this.state = { 
+      imageUploadRequested: false,
+      images: this.props.images,
+    };
+
     this.onImageUploadHandler = this.onImageUploadHandler.bind(this);
     this.submittedImages = [];
   }
@@ -36,13 +42,22 @@ export class EditListingPhotosFormComponent extends Component {
     }
   }
 
+
+  handleOnSortEnd = ({ oldIndex, newIndex }) => {
+    const { images } = this.state;
+    const newImages = arrayMoveImmutable(images, oldIndex, newIndex);
+    this.setState({ images: newImages })
+    this.props.onSortEnd(newImages)
+  }    
+
+
   render() {
     return (
       <FinalForm
         {...this.props}
         onImageUploadHandler={this.onImageUploadHandler}
         imageUploadRequested={this.state.imageUploadRequested}
-        initialValues={{ images: this.props.images }}
+        initialValues={{ images: this.state.images }}
         render={formRenderProps => {
           const {
             form,
@@ -61,6 +76,7 @@ export class EditListingPhotosFormComponent extends Component {
             updated,
             updateInProgress,
           } = formRenderProps;
+
 
           const chooseImageText = (
             <span className={css.chooseImageText}>
@@ -142,12 +158,14 @@ export class EditListingPhotosFormComponent extends Component {
               ) : null}
               <AddImages
                 className={css.imagesField}
-                images={images}
+                images={this.props.images}
                 thumbnailClassName={css.thumbnail}
                 savedImageAltText={intl.formatMessage({
                   id: 'EditListingPhotosForm.savedImageAltText',
                 })}
                 onRemoveImage={onRemoveImage}
+                onSortEnd={this.handleOnSortEnd}
+                axis='x, y'
               >
                 <Field
                   id="addImage"

@@ -10,6 +10,26 @@ import { ListingLink } from '../../components';
 import css from './EditListingPhotosPanel.module.css';
 
 class EditListingPhotosPanel extends Component {
+  constructor(props){
+    super(props);
+
+    this.state = {
+      reorderedImages: this.props.images,
+    }
+  }
+
+  componentDidUpdate() {
+    const lengthChanged = this.props.images.length !== this.state.reorderedImages.length;
+
+    if (lengthChanged) {
+      this.setState({ reorderedImages: this.props.images })
+    }
+  }
+
+  shouldComponentUpdate(props) {
+    return props.images.every(i => !!i.imageId?.uuid || !!i.id?.uuid);
+  }
+
   render() {
     const {
       className,
@@ -32,6 +52,10 @@ class EditListingPhotosPanel extends Component {
     const rootClass = rootClassName || css.root;
     const classes = classNames(rootClass, className);
     const currentListing = ensureOwnListing(listing);
+
+    const onSortEnd = (newImages) => {
+      this.setState({ reorderedImages: newImages })
+    }    
 
     const isPublished =
       currentListing.id && currentListing.attributes.state !== LISTING_STATE_DRAFT;
@@ -59,15 +83,27 @@ class EditListingPhotosPanel extends Component {
           ready={ready}
           fetchErrors={errors}
           initialValues={{ images }}
-          images={images}
+          images={this.state.reorderedImages}
           onImageUpload={onImageUpload}
           onSubmit={values => {
             const { addImage, ...updateValues } = values;
+
+            if (!!this.state.reorderedImages) {
+              const reorderedValues = {
+                ...updateValues,
+                images: this.state.reorderedImages,
+              } 
+
+              onSubmit(reorderedValues)
+            } else {
             onSubmit(updateValues);
+            }
+
           }}
           onChange={onChange}
           onUpdateImageOrder={onUpdateImageOrder}
           onRemoveImage={onRemoveImage}
+          onSortEnd={onSortEnd}
           saveActionMsg={submitButtonText}
           updated={panelUpdated}
           updateInProgress={updateInProgress}
