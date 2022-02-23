@@ -6,39 +6,8 @@ import { LISTING_STATE_DRAFT } from '../../util/types';
 import { EditListingPhotosForm } from '../../forms';
 import { ensureOwnListing } from '../../util/data';
 import { ListingLink } from '../../components';
-import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 
 import css from './EditListingPhotosPanel.module.css';
-
-const ImageList = SortableContainer(({images})=> {
-  if (!images) {
-    return null;
-  }
-
-  return (
-    <div>
-      {images.map((img, idx) => (
-        <div>
-          <ImageElement
-            index={idx}
-            key={img.id.uuid}
-            id={img.id.uuid}
-          />
-        </div>
-      ))}
-    </div>
-  )
-})
-
-const ImageElement = SortableElement(props => {
-  const { id } = props;
-
-  return(
-    <div>
-      <span key={id} >Image id: {id} </span>
-    </div>
-  )
-})
 
 class EditListingPhotosPanel extends Component {
   constructor(props){
@@ -139,14 +108,6 @@ class EditListingPhotosPanel extends Component {
           updated={panelUpdated}
           updateInProgress={updateInProgress}
         />
-
-          <div>
-            <ImageList 
-              onSortEnd={onSortEnd}
-              images={images}
-              axis='y'
-              />
-          </div>
       </div>
     );
   }
