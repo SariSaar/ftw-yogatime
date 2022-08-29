@@ -10,7 +10,8 @@ import jstz from 'jstimezonedetect';
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 
-const timeSlotMinutes = 75;
+const firstSlotMinutes = 45;
+const additionalMinutes = 30;
 
 /**
  * Check that the given parameter is a Date object.
@@ -243,9 +244,13 @@ const round = (date, duration, method) => moment(
  *
  * @returns {Array} an array of localized hours.
  */
-export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst = false) => {
-  // Don't add the time slot duration to the first start time
-  const addMinutes = isFirst && isStart ? 0 : timeSlotMinutes;
+export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst) => {
+  // Handle first time slots differently.
+  const addMinutes = !isFirst ? additionalMinutes
+    // For the first start slot, don't add the time slot duration
+    : isStart ? 0
+    // For the first end slot, use the first slot length
+    : firstSlotMinutes;
   const boundary = moment(currentMomentOrDate)
       .clone()
       .tz(timeZone)
