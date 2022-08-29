@@ -4,8 +4,8 @@ import classNames from 'classnames';
 import config from '../../config';
 import { intlShape } from '../../util/reactIntl';
 import {
-  getStartHours,
-  getEndHours,
+  getStartTimePoints,
+  getEndTimePoints,
   isInRange,
   isSameDate,
   isDayMomentInsideRange,
@@ -64,7 +64,7 @@ const getAvailableStartTimes = (intl, timeZone, bookingStart, timeSlotsOnSelecte
     // Otherwise use the end of the timeslot.
     const endLimit = dateIsAfter(endDate, nextDate) ? nextDate : endDate;
 
-    const hours = getStartHours(intl, timeZone, startLimit, endLimit);
+    const hours = getStartTimePoints(intl, timeZone, startLimit, endLimit);
     return availableHours.concat(hours);
   }, []);
   return allHours;
@@ -108,7 +108,7 @@ const getAvailableEndTimes = (
       : dayAfterBookingEnd;
   }
 
-  return getEndHours(intl, timeZone, startLimit, endLimit);
+  return getEndTimePoints(intl, timeZone, startLimit, endLimit);
 };
 
 const getTimeSlots = (timeSlots, date, timeZone) => {

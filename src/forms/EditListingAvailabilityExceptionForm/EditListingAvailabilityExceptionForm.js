@@ -8,8 +8,8 @@ import { intlShape, injectIntl, FormattedMessage } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
 import {
   getTimeslotBoundaries,
-  getStartHours,
-  getEndHours,
+  getStartTimePoints,
+  getEndTimePoints,
   isDayMomentInsideRange,
   isInRange,
   isSameDate,
@@ -127,7 +127,7 @@ const getAvailableStartTimes = (date, timeRangesOnSelectedDate, intl, timeZone) 
     // Otherwise use the end of the timeslot.
     const endLimit = dateIsAfter(end, nextDay) ? nextDay : end;
 
-    const hours = getStartHours(intl, timeZone, startLimit, endLimit);
+    const hours = getStartTimePoints(intl, timeZone, startLimit, endLimit);
     return availableHours.concat(hours);
   }, []);
   return allHours;
@@ -187,7 +187,7 @@ const getAvailableEndTimes = (
   const limitEnd = timeRangeEndOrNextMidnight(timeRangeEnd, dayAfterSelectedEndDate);
 
   return isSingleDayRange
-    ? getEndHours(intl, timeZone, limitStart, limitEnd)
+    ? getEndTimePoints(intl, timeZone, limitStart, limitEnd)
     : getTimeslotBoundaries(intl, timeZone, limitStart, limitEnd);
 };
 

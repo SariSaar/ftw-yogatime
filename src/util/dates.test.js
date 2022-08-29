@@ -9,8 +9,8 @@ import {
   localizeAndFormatTime,
   findNextBoundary,
   getSharpHours,
-  getStartHours,
-  getEndHours,
+  getStartTimePoints,
+  getEndTimePoints,
   nightsBetween,
   daysBetween,
   isSameDay,
@@ -145,35 +145,35 @@ describe('date utils', () => {
     });
   });
 
-  describe('getStartHours()', () => {
+  describe('getStartTimePoints()', () => {
     it('should return sharp hours, when startTime and endTime are sharp hours', () => {
       const startHour = new Date('2019-09-18T08:00:00.000Z');
       const endHour = new Date('2019-09-18T09:00:00.000Z');
-      expect(getStartHours(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
+      expect(getStartTimePoints(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
         { timestamp: 1568793600000, timeOfDay: '11:00 AM' },
       ]);
     });
     it('should return sharp hours, when startTime and endTime are half hours', () => {
       const startHour = new Date('2019-09-18T08:30:00.000Z');
       const endHour = new Date('2019-09-18T09:30:00.000Z');
-      expect(getStartHours(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
+      expect(getStartTimePoints(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
         { timestamp: 1568797200000, timeOfDay: '12:00 PM' },
       ]);
     });
   });
 
-  describe('getEndHours()', () => {
+  describe('getEndTimePoints()', () => {
     it('should return sharp hours, when startTime and endTime are sharp hours', () => {
       const startHour = new Date('2019-09-18T08:00:00.000Z');
       const endHour = new Date('2019-09-18T09:00:00.000Z');
-      expect(getEndHours(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
+      expect(getEndTimePoints(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
         { timestamp: 1568797200000, timeOfDay: '12:00 PM' },
       ]);
     });
     it('should return sharp hours, when startTime and endTime are half hours', () => {
       const startHour = new Date('2019-09-18T08:30:00.000Z');
       const endHour = new Date('2019-09-18T09:30:00.000Z');
-      expect(getEndHours(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([]);
+      expect(getEndTimePoints(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([]);
     });
   });
 

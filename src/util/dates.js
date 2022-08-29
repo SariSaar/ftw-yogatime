@@ -10,6 +10,8 @@ import jstz from 'jstimezonedetect';
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 
+const timeSlotMinutes = 45;
+
 /**
  * Check that the given parameter is a Date object.
  *
@@ -180,8 +182,8 @@ export const localizeAndFormatTime = (
 // - findBookingUnitBoundaries (DST changes)
 // - findNextBoundary
 // - getSharpHours
-// - getStartHours
-// - getEndHours
+// - getStartTimePoints
+// - getEndTimePoints
 // - calculateQuantityFromHours
 
 // Helper function for exported function: getSharpHours
@@ -223,7 +225,7 @@ const findBookingUnitBoundaries = params => {
 };
 
 /**
- * Rounding function for 15 minute intervals
+ * Rounding function for time slot minute intervals
  * @param {*} date 
  * @param {*} duration 
  * @param {*} method 
@@ -245,7 +247,7 @@ export const findNextBoundary = (timeZone, currentMomentOrDate, isStart) =>{
   const boundary = moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
-    .add(15, 'minute')
+    .add(timeSlotMinutes, 'minute')
     .toDate();
     const roundDirection = isStart ? "floor" : "ceil";
 
@@ -307,7 +309,7 @@ export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime, isStar
  * Find sharp start hours for bookable time units (hour) inside given time window.
  * Returned strings are localized to given time zone.
  *
- * > getStartHours(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
+ * > getStartTimePoints(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
  * => [
  *    {
  *      "timestamp": 1568793600000,
@@ -330,7 +332,7 @@ export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime, isStar
  *
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
-export const getStartHours = (intl, timeZone, startTime, endTime) => {
+export const getStartTimePoints = (intl, timeZone, startTime, endTime) => {
   const hours = getTimeslotBoundaries(intl, timeZone, startTime, endTime, true);
   return hours;
 };
@@ -362,7 +364,7 @@ export const getStartHours = (intl, timeZone, startTime, endTime) => {
  *
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
-export const getEndHours = (intl, timeZone, startTime, endTime) => {
+export const getEndTimePoints = (intl, timeZone, startTime, endTime) => {
   const hours = getTimeslotBoundaries(intl, timeZone, startTime, endTime);
   return hours;
 };
