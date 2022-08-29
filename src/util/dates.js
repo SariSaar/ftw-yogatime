@@ -10,7 +10,7 @@ import jstz from 'jstimezonedetect';
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 
-const timeSlotMinutes = 45;
+const timeSlotMinutes = 75;
 
 /**
  * Check that the given parameter is a Date object.
@@ -232,7 +232,10 @@ const findBookingUnitBoundaries = params => {
  * @returns 
  */
 function round(date, duration, method) {
-  return moment(Math[method]((+date) / (+duration)) * (+duration)).toDate(); 
+  const ms = duration.asMilliseconds();
+  console.log({date}, { duration }, { ms })
+
+  return moment(Math[method]((date.getTime()) / (duration)) * (duration)).toDate(); 
 }
 
 /**
@@ -243,15 +246,21 @@ function round(date, duration, method) {
  *
  * @returns {Array} an array of localized hours.
  */
-export const findNextBoundary = (timeZone, currentMomentOrDate, isStart) =>{
+export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst = false) =>{
+  console.log({ currentMomentOrDate })
+  const addMinutes = isFirst && isStart ? 0 : timeSlotMinutes;
   const boundary = moment(currentMomentOrDate)
-    .clone()
-    .tz(timeZone)
-    .add(timeSlotMinutes, 'minute')
-    .toDate();
-    const roundDirection = isStart ? "floor" : "ceil";
+      .clone()
+      .tz(timeZone)
+      .add(addMinutes, 'minute')
+      .toDate();
 
-    return round(boundary, moment.duration(15, "minutes"), roundDirection);    
+  const roundDirection = isStart && !isFirst ? "floor" : "ceil";
+
+  // console.log({ roundDirection }, { boundary }, { currentMomentOrDate })
+
+  return round(boundary, moment.duration(15, "minutes"), roundDirection);  
+
 }
 
 /**
@@ -295,7 +304,7 @@ export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime, isStar
   // I.e. startTime might be a sharp hour.
   const millisecondBeforeStartTime = new Date(startTime.getTime() - 1);
   return findBookingUnitBoundaries({
-    currentBoundary: findNextBoundary(timeZone, millisecondBeforeStartTime, isStart),
+    currentBoundary: findNextBoundary(timeZone, millisecondBeforeStartTime, isStart, true),
     startMoment: moment(startTime),
     endMoment: moment(endTime),
     nextBoundaryFn: findNextBoundary,
