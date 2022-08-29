@@ -231,12 +231,9 @@ const findBookingUnitBoundaries = params => {
  * @param {*} method 
  * @returns 
  */
-function round(date, duration, method) {
-  const ms = duration.asMilliseconds();
-  console.log({date}, { duration }, { ms })
-
-  return moment(Math[method]((date.getTime()) / (duration)) * (duration)).toDate(); 
-}
+const round = (date, duration, method) => moment(
+    Math[method]((date.getTime()) / (duration)) * (duration)
+  ).toDate();
 
 /**
  * Find the next sharp hour after the current moment.
@@ -246,8 +243,8 @@ function round(date, duration, method) {
  *
  * @returns {Array} an array of localized hours.
  */
-export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst = false) =>{
-  console.log({ currentMomentOrDate })
+export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst = false) => {
+  // Don't add the time slot duration to the first start time
   const addMinutes = isFirst && isStart ? 0 : timeSlotMinutes;
   const boundary = moment(currentMomentOrDate)
       .clone()
@@ -255,12 +252,10 @@ export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst
       .add(addMinutes, 'minute')
       .toDate();
 
+  // Round start times down, except the first timeslot without time additions, and end times up
   const roundDirection = isStart && !isFirst ? "floor" : "ceil";
 
-  // console.log({ roundDirection }, { boundary }, { currentMomentOrDate })
-
-  return round(boundary, moment.duration(15, "minutes"), roundDirection);  
-
+  return round(boundary, moment.duration(15, "minutes"), roundDirection);
 }
 
 /**
@@ -304,6 +299,8 @@ export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime, isStar
   // I.e. startTime might be a sharp hour.
   const millisecondBeforeStartTime = new Date(startTime.getTime() - 1);
   return findBookingUnitBoundaries({
+    // Add "true" for isFirst parameter to the first iteration of getting time slots
+    // to facilitate rounding
     currentBoundary: findNextBoundary(timeZone, millisecondBeforeStartTime, isStart, true),
     startMoment: moment(startTime),
     endMoment: moment(endTime),
@@ -315,7 +312,7 @@ export const getTimeslotBoundaries = (intl, timeZone, startTime, endTime, isStar
 };
 
 /**
- * Find sharp start hours for bookable time units (hour) inside given time window.
+ * Find start time points for bookable time units (time slot minutes) inside given time window.
  * Returned strings are localized to given time zone.
  *
  * > getStartTimePoints(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
@@ -347,7 +344,7 @@ export const getStartTimePoints = (intl, timeZone, startTime, endTime) => {
 };
 
 /**
- * Find sharp end hours for bookable time units (hour) inside given time window.
+ * Find end time points for bookable time units (time slot minutes) inside given time window.
  * Returned strings are localized to given time zone.
  *
  * > getStartingHours(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
