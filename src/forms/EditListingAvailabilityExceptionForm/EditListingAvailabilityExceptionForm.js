@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { intlShape, injectIntl, FormattedMessage } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
 import {
-  getSharpHours,
+  getTimeSlotBoundaries,
   getStartHours,
   getEndHours,
   isDayMomentInsideRange,
@@ -188,7 +188,7 @@ const getAvailableEndTimes = (
 
   return isSingleDayRange
     ? getEndHours(intl, timeZone, limitStart, limitEnd)
-    : getSharpHours(intl, timeZone, limitStart, limitEnd);
+    : getTimeSlotBoundaries(intl, timeZone, limitStart, limitEnd);
 };
 
 // Get time-ranges on given date.

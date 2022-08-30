@@ -8,7 +8,7 @@ import {
   localizeAndFormatDate,
   localizeAndFormatTime,
   findNextBoundary,
-  getSharpHours,
+  getTimeSlotBoundaries,
   getStartHours,
   getEndHours,
   nightsBetween,
@@ -127,11 +127,11 @@ describe('date utils', () => {
     });
   });
 
-  describe('getSharpHours()', () => {
+  describe('getTimeSlotBoundaries()', () => {
     it('should return sharp hours, when startTime and endTime are sharp hours', () => {
       const startHour = new Date('2019-09-18T08:00:00.000Z');
       const endHour = new Date('2019-09-18T09:00:00.000Z');
-      expect(getSharpHours(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
+      expect(getTimeSlotBoundaries(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
         { timestamp: 1568793600000, timeOfDay: '11:00 AM' },
         { timestamp: 1568797200000, timeOfDay: '12:00 PM' },
       ]);
@@ -139,7 +139,7 @@ describe('date utils', () => {
     it('should return sharp hours, when startTime and endTime are half hours', () => {
       const startHour = new Date('2019-09-18T08:30:00.000Z');
       const endHour = new Date('2019-09-18T09:30:00.000Z');
-      expect(getSharpHours(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
+      expect(getTimeSlotBoundaries(intl, 'Europe/Helsinki', startHour, endHour)).toEqual([
         { timestamp: 1568797200000, timeOfDay: '12:00 PM' },
       ]);
     });

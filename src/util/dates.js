@@ -10,6 +10,8 @@ import jstz from 'jstimezonedetect';
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 
+const timeSlotMinutes = 30;
+
 /**
  * Check that the given parameter is a Date object.
  *
@@ -179,12 +181,12 @@ export const localizeAndFormatTime = (
 // and different boundaries than sharp hours, you need to modify these functions:
 // - findBookingUnitBoundaries (DST changes)
 // - findNextBoundary
-// - getSharpHours
+// - getTimeSlotBoundaries
 // - getStartHours
 // - getEndHours
 // - calculateQuantityFromHours
 
-// Helper function for exported function: getSharpHours
+// Helper function for exported function: getTimeSlotBoundaries
 // Recursively find boundaries for bookable time slots.
 const findBookingUnitBoundaries = params => {
   const {
@@ -223,6 +225,19 @@ const findBookingUnitBoundaries = params => {
 };
 
 /**
+ * Rounding extension function for moment.js. Rounds the Moment provided by the context
+ * to the start of the specified time value in the specified units. Rounds to sharp hours
+ * when the value is a factor of an hour (e.g. 10, 15, 20, 30 minutes).
+ * @param {*} value the rounding value. 
+ * @param {*} unit time units to specify the value
+ * @returns Moment rounded to the start of the specified time value
+ */
+moment.fn.startOfDuration = function(value, unit) {
+  const ms = moment.duration(value, unit)._milliseconds;
+  return moment(Math.floor(this / ms) * ms);
+}
+
+/**
  * Find the next sharp hour after the current moment.
  *
  * @param {String} timezone name. It should represent IANA timezone key.
@@ -234,14 +249,14 @@ export const findNextBoundary = (timeZone, currentMomentOrDate) =>
   moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
-    .add(1, 'hour')
-    .startOf('hour')
+    .add(timeSlotMinutes, 'minutes')
+    .startOfDuration(timeSlotMinutes, 'minutes')
     .toDate();
 
 /**
  * Find sharp hours inside given time window. Returned strings are localized to given time zone.
  *
- * > getSharpHours(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
+ * > getTimeSlotBoundaries(intl, 'Europe/Helsinki', new Date('2019-09-18T08:00:00.000Z'), new Date('2019-09-18T11:00:00.000Z'));
  * => [
  *    {
  *      "timestamp": 1568793600000,
@@ -268,10 +283,10 @@ export const findNextBoundary = (timeZone, currentMomentOrDate) =>
  *
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
-export const getSharpHours = (intl, timeZone, startTime, endTime) => {
+export const getTimeSlotBoundaries = (intl, timeZone, startTime, endTime) => {
   if (!moment.tz.zone(timeZone)) {
     throw new Error(
-      'Time zones are not loaded into moment-timezone. "getSharpHours" function uses time zones.'
+      'Time zones are not loaded into moment-timezone. "getTimeSlotBoundaries" function uses time zones.'
     );
   }
 
@@ -317,7 +332,7 @@ export const getSharpHours = (intl, timeZone, startTime, endTime) => {
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
 export const getStartHours = (intl, timeZone, startTime, endTime) => {
-  const hours = getSharpHours(intl, timeZone, startTime, endTime);
+  const hours = getTimeSlotBoundaries(intl, timeZone, startTime, endTime);
   return hours.length < 2 ? hours : hours.slice(0, -1);
 };
 
@@ -349,7 +364,7 @@ export const getStartHours = (intl, timeZone, startTime, endTime) => {
  * @returns {Array} an array of objects with keys timestamp and timeOfDay.
  */
 export const getEndHours = (intl, timeZone, startTime, endTime) => {
-  const hours = getSharpHours(intl, timeZone, startTime, endTime);
+  const hours = getTimeSlotBoundaries(intl, timeZone, startTime, endTime);
   return hours.length < 2 ? [] : hours.slice(1);
 };
 
