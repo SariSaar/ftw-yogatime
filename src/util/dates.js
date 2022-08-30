@@ -239,6 +239,19 @@ moment.fn.startOfDuration = function(value, unit) {
 }
 
 /**
+ * Calculate the greatest common divisor of first timeslot length and general timeslot length
+ * to determine rounding value. 
+ */
+const gcd = (k, n) => {
+  return k ? gcd(n % k, k) : n;
+}
+
+/**
+ * If first time slot is shorter than general time slot, swap the attributes around
+ */
+const rounding = gcd(timeSlotMinutes, firstSlotMinutes)
+
+/**
  * Find the next sharp hour after the current moment.
  *
  * @param {String} timezone name. It should represent IANA timezone key.
@@ -252,7 +265,7 @@ export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst
     .clone()
     .tz(timeZone)
     .add(increment, 'minutes')
-    .startOfDuration(15, 'minutes')
+    .startOfDuration(rounding, 'minutes')
     .toDate();
   }
 
