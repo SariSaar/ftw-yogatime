@@ -11,7 +11,7 @@ export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 
 const firstSlotMinutes = 75;
-const timeSlotMinutes = 30;
+const timeSlotMinutes = 45;
 
 /**
  * Check that the given parameter is a Date object.
@@ -247,6 +247,7 @@ const gcd = (a, b) => {
 }
 
 /**
+ * Define the rounding value. 
  * If first time slot is shorter than general time slot, swap the attributes around
  */
 const rounding = gcd(timeSlotMinutes, firstSlotMinutes)
@@ -260,7 +261,13 @@ const rounding = gcd(timeSlotMinutes, firstSlotMinutes)
  * @returns {Array} an array of localized hours.
  */
 export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst) => {
-  const increment = !isFirst ? timeSlotMinutes : !isStart ? firstSlotMinutes : 0;
+  // Increment the time slot:
+  const increment = !isFirst ? 
+    // - for non-first boundaries, use default time slot
+    timeSlotMinutes : !isStart ? 
+    // - for the first end boundary, use firstSlotMinutes, 
+    // - and for the first start boundary, use 0 i.e. don't increment the start time value
+    firstSlotMinutes : 0;
   return moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
@@ -306,12 +313,9 @@ export const getTimeSlotBoundaries = (intl, timeZone, startTime, endTime, isStar
     );
   }
 
-  // Select a moment before startTime to find next possible sharp hour.
-  // I.e. startTime might be a sharp hour.
-  const millisecondBeforeStartTime = new Date(startTime.getTime());
   return findBookingUnitBoundaries({
-    // add isStart and isFirst params
-    currentBoundary: findNextBoundary(timeZone, millisecondBeforeStartTime, isStart, true),
+    // add isStart and isFirst params to determine first time slot handling
+    currentBoundary: findNextBoundary(timeZone, startTime, isStart, true),
     startMoment: moment(startTime),
     endMoment: moment(endTime),
     nextBoundaryFn: findNextBoundary,
