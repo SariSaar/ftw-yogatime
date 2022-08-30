@@ -239,11 +239,11 @@ moment.fn.startOfDuration = function(value, unit) {
 }
 
 /**
- * Calculate the greatest common divisor of first timeslot length and general timeslot length
- * to determine rounding value. 
+ * Calculate the greatest common divisor (gcd) of first timeslot length and general timeslot length
+ * to determine rounding value using the Euclidean algorithm (https://en.wikipedia.org/wiki/Euclidean_algorithm). 
  */
-const gcd = (k, n) => {
-  return k ? gcd(n % k, k) : n;
+const gcd = (a, b) => {
+  return a ? gcd(b % a, a) : b;
 }
 
 /**
