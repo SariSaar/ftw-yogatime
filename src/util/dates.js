@@ -350,7 +350,10 @@ export const getTimeSlotBoundaries = (intl, timeZone, startTime, endTime, isStar
  */
 export const getStartHours = (intl, timeZone, startTime, endTime) => {
   const hours = getTimeSlotBoundaries(intl, timeZone, startTime, endTime, true);
-  return hours.length < 2 ? hours : hours.slice(0, -1);
+  // Remove enough start times so that the first slot length can successfully be
+  // booked also from the last start time
+  const endSlotRemoveCount = Math.ceil(firstSlotMinutes / timeSlotMinutes)
+  return hours.length < 2 ? hours : hours.slice(0, -endSlotRemoveCount);
 };
 
 /**
