@@ -313,9 +313,11 @@ export const getTimeSlotBoundaries = (intl, timeZone, startTime, endTime, isStar
     );
   }
 
+  const millisecondAfterStartTime = new Date(startTime.getTime() + 1);
+
   return findBookingUnitBoundaries({
     // add isStart and isFirst params to determine first time slot handling
-    currentBoundary: findNextBoundary(timeZone, startTime, isStart, true),
+    currentBoundary: findNextBoundary(timeZone, millisecondAfterStartTime, isStart, true),
     startMoment: moment(startTime),
     endMoment: moment(endTime),
     nextBoundaryFn: findNextBoundary,
