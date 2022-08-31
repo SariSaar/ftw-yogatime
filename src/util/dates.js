@@ -10,8 +10,7 @@ import jstz from 'jstimezonedetect';
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 
-const firstSlotMinutes = 75;
-const timeSlotMinutes = 45;
+const timeSlotMinutes = 80;
 
 /**
  * Check that the given parameter is a Date object.
@@ -250,7 +249,7 @@ const gcd = (a, b) => {
  * Define the rounding value. 
  * If first time slot is shorter than general time slot, swap the attributes around
  */
-const rounding = gcd(timeSlotMinutes, firstSlotMinutes)
+const rounding = gcd(timeSlotMinutes, 60)
 
 /**
  * Find the next sharp hour after the current moment.
@@ -262,12 +261,7 @@ const rounding = gcd(timeSlotMinutes, firstSlotMinutes)
  */
 export const findNextBoundary = (timeZone, currentMomentOrDate, isStart, isFirst) => {
   // Increment the time slot:
-  const increment = !isFirst ? 
-    // - for non-first boundaries, use default time slot
-    timeSlotMinutes : !isStart ? 
-    // - for the first end boundary, use firstSlotMinutes, 
-    // - and for the first start boundary, use 0 i.e. don't increment the start time value
-    firstSlotMinutes : 0;
+  const increment = (isFirst && isStart) ? 0 : timeSlotMinutes;
   return moment(currentMomentOrDate)
     .clone()
     .tz(timeZone)
@@ -313,9 +307,11 @@ export const getTimeSlotBoundaries = (intl, timeZone, startTime, endTime, isStar
     );
   }
 
+  const millisecondAfterStartTime = new Date(startTime.getTime() +1)
+
   return findBookingUnitBoundaries({
     // add isStart and isFirst params to determine first time slot handling
-    currentBoundary: findNextBoundary(timeZone, startTime, isStart, true),
+    currentBoundary: findNextBoundary(timeZone, millisecondAfterStartTime, isStart, true),
     startMoment: moment(startTime),
     endMoment: moment(endTime),
     nextBoundaryFn: findNextBoundary,
@@ -356,8 +352,7 @@ export const getStartHours = (intl, timeZone, startTime, endTime) => {
   const hours = getTimeSlotBoundaries(intl, timeZone, startTime, endTime, true);
   // Remove enough start times so that the first slot length can successfully be
   // booked also from the last start time
-  const endSlotRemoveCount = Math.ceil(firstSlotMinutes / timeSlotMinutes)
-  return hours.length < 2 ? hours : hours.slice(0, -endSlotRemoveCount);
+  return hours.length < 2 ? hours : hours.slice(0, -1);
 };
 
 /**
