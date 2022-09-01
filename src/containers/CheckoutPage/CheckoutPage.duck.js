@@ -11,6 +11,8 @@ import {
 } from '../../util/transaction';
 import * as log from '../../util/log';
 import { fetchCurrentUserHasOrdersSuccess, fetchCurrentUser } from '../../ducks/user.duck';
+import moment from 'moment';
+import { bufferMinutes } from '../../util/dates';
 
 // ================ Action types ================ //
 
@@ -172,21 +174,31 @@ export const initiateOrder = (orderParams, transactionId) => (dispatch, getState
     : TRANSITION_REQUEST_PAYMENT;
   const isPrivilegedTransition = isPrivileged(transition);
 
+  const bufferEnd = moment(orderParams.bookingEnd).add(bufferMinutes, 'minutes').toDate();
+
+  const bufferedParams = {
+    ...orderParams,
+    bookingEnd: bufferEnd,
+    bookingDisplayEnd: orderParams.bookingEnd,
+    bookingDisplayStart: orderParams.bookingStart,
+  };
+
   const bookingData = {
     startDate: orderParams.bookingStart,
-    endDate: orderParams.bookingEnd,
+    endDate: bufferedParams.bookingEnd,
+    displayEnd: bufferedParams.bookingDisplayEnd,
   };
 
   const bodyParams = isTransition
     ? {
         id: transactionId,
         transition,
-        params: orderParams,
+        params: bufferedParams,
       }
     : {
         processAlias: config.bookingProcessAlias,
         transition,
-        params: orderParams,
+        params: bufferedParams,
       };
   const queryParams = {
     include: ['booking', 'provider'],

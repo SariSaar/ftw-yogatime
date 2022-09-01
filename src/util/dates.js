@@ -10,6 +10,9 @@ import jstz from 'jstimezonedetect';
 export const START_DATE = 'startDate';
 export const END_DATE = 'endDate';
 
+export const bufferMinutes = 15;
+const hourMinutes = 60;
+
 /**
  * Check that the given parameter is a Date object.
  *
@@ -318,7 +321,8 @@ export const getSharpHours = (intl, timeZone, startTime, endTime) => {
  */
 export const getStartHours = (intl, timeZone, startTime, endTime) => {
   const hours = getSharpHours(intl, timeZone, startTime, endTime);
-  return hours.length < 2 ? hours : hours.slice(0, -1);
+  const removeCount = Math.ceil((hourMinutes + bufferMinutes) / hourMinutes)
+  return hours.length < removeCount ? [] : hours.slice(0, -removeCount);
 };
 
 /**
