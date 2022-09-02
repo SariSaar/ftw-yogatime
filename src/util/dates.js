@@ -199,6 +199,7 @@ const findBookingUnitBoundaries = params => {
     intl,
     timeZone,
     isStart,
+    isFirst = false,
   } = params;
 
   if (moment(currentBoundary).isBetween(startMoment, endMoment, null, '[]')) {
@@ -220,7 +221,7 @@ const findBookingUnitBoundaries = params => {
     return findBookingUnitBoundaries({
       ...params,
       cumulatedResults: [...cumulatedResults, ...newBoundary],
-      currentBoundary: moment(nextBoundaryFn(timeZone, currentBoundary, false, isStart)),
+      currentBoundary: moment(nextBoundaryFn(timeZone, currentBoundary, isFirst, isStart)),
     });
   }
   return cumulatedResults;
@@ -301,11 +302,11 @@ export const getSharpHours = (intl, timeZone, startTime, endTime, isStart = fals
     );
   }
 
-  // Select a moment before startTime to find next possible sharp hour.
-  // I.e. startTime might be a sharp hour.
-  const millisecondBeforeStartTime = new Date(startTime.getTime() - 1);
+  // For the first currentBoundary, we pass isFirst as true
+  const isFirst = true;
+
   return findBookingUnitBoundaries({
-    currentBoundary: findNextBoundary(timeZone, startTime, true, isStart),
+    currentBoundary: findNextBoundary(timeZone, startTime, isFirst, isStart),
     startMoment: moment(startTime),
     endMoment: moment(endTime),
     nextBoundaryFn: findNextBoundary,
