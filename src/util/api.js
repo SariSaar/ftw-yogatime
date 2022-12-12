@@ -40,15 +40,23 @@ const deserialize = str => {
   return transit.read(str, { typeHandlers });
 };
 
-const post = (path, body) => {
+const post = (path, body, skipSerialise = false) => {
   const url = `${apiBaseUrl()}${path}`;
+
+
+  // Temp solution for skipping Content-Type on multipart/form-data
+  // to allow form data to be passed correctly to the server
+  const contentTypeHeader = skipSerialise ? {} : { 
+    'Content-Type': 'application/transit+json'
+  } 
+
   const options = {
     method: 'POST',
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/transit+json',
+      ...contentTypeHeader
     },
-    body: serialize(body),
+    body: skipSerialise ? body :  serialize(body),
   };
   return window.fetch(url, options).then(res => {
     const contentTypeHeader = res.headers.get('Content-Type');
@@ -115,3 +123,8 @@ export const transitionPrivileged = body => {
 export const createUserWithIdp = body => {
   return post('/api/auth/create-user-with-idp', body);
 };
+
+// Pass skipSerialise as true since endpoint handles multipart/form-data
+export const testImageUpload = body => {
+  return post('/api/test-image-upload', body, true)
+}

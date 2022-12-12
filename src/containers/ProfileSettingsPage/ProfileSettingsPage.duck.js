@@ -1,6 +1,7 @@
 import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import { currentUserShowSuccess } from '../../ducks/user.duck';
+import { testImageUpload } from '../../util/api';
 
 // ================ Action types ================ //
 
@@ -108,6 +109,15 @@ export const updateProfileError = error => ({
 });
 
 // ================ Thunk ================ //
+
+export const testSubmitImage = payload => (dispatch, getState, sdk) => {
+  const formData = new FormData();
+  formData.append('files', payload)
+  testImageUpload(formData).then(res => {
+    console.log({ res })
+    // Update current user in state to show profile image, or refresh page
+  })
+}
 
 // Images return imageId which we need to map with previously generated temporary id
 export function uploadImage(actionPayload) {

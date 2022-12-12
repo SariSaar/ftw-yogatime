@@ -19,7 +19,7 @@ import {
 import { ProfileSettingsForm } from '../../forms';
 import { TopbarContainer } from '../../containers';
 
-import { updateProfile, uploadImage } from './ProfileSettingsPage.duck';
+import { testSubmitImage, updateProfile, uploadImage } from './ProfileSettingsPage.duck';
 import css from './ProfileSettingsPage.module.css';
 
 const onImageUploadHandler = (values, fn) => {
@@ -42,6 +42,7 @@ export class ProfileSettingsPageComponent extends Component {
       updateProfileError,
       uploadImageError,
       uploadInProgress,
+      onTestImageSubmit,
       intl,
     } = this.props;
 
@@ -112,6 +113,14 @@ export class ProfileSettingsPageComponent extends Component {
                   </NamedLink>
                 ) : null}
               </div>
+              <input 
+                type="file"
+                label="Add image here"
+                onInput={(e) => {
+                  console.log({ files: e.target.files })
+                  onTestImageSubmit(e.target.files[0])
+                }}
+              />
               {profileSettingsForm}
             </div>
           </LayoutWrapperMain>
@@ -177,6 +186,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   onImageUpload: data => dispatch(uploadImage(data)),
   onUpdateProfile: data => dispatch(updateProfile(data)),
+  onTestImageSubmit: data => dispatch(testSubmitImage(data))
 });
 
 const ProfileSettingsPage = compose(

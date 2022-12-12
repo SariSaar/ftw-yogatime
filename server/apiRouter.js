@@ -10,11 +10,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { deserialize } = require('./api-util/sdk');
 
+const multer = require('multer');
+
+
 const initiateLoginAs = require('./api/initiate-login-as');
 const loginAs = require('./api/login-as');
 const transactionLineItems = require('./api/transaction-line-items');
 const initiatePrivileged = require('./api/initiate-privileged');
 const transitionPrivileged = require('./api/transition-privileged');
+const imageUpload = require('./api/test-image-upload');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
 
@@ -31,6 +35,8 @@ router.use(
     type: 'application/transit+json',
   })
 );
+
+const upload = multer({ dest: './uploads/' });
 
 // Deserialize Transit body string to JS data
 router.use((req, res, next) => {
@@ -79,5 +85,11 @@ router.get('/auth/google', authenticateGoogle);
 // with Google. In this route a Passport.js custom callback is used for calling
 // loginWithIdp endpoint in Flex API to authenticate user to Flex
 router.get('/auth/google/callback', authenticateGoogleCallback);
+
+router.post(
+  '/test-image-upload', 
+  upload.single('files'), 
+  imageUpload
+)
 
 module.exports = router;
